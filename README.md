@@ -1,1 +1,0 @@
-# zumratmo.github.io
