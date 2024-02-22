@@ -1,0 +1,30 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "Zumratmo"
+  navbar: About me, Projects, "Blog Posts"
+  search: "true"
+    left:
+      - href: index.qmd
+        text: "Home"
+      - about.qmd
+      
+page-footer:
+    left: |
+      &copy; Zumratmo Zarifkhonova, 2024<br>
+      All content licensed under <i class='bi-badge-cc'></i>
+      [(CC BY-NC-SA 4.0)](http://creativecommons.org/licenses/by-nc-sa/4.0/)
+    right: |
+      Site built with <a href='https://quarto.org/'>Quarto</a>
+
+
+format:
+  html:
+    theme: morph
+    css: styles.css
+    toc: true
+
+editor: visual
+
