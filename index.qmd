@@ -1,11 +1,35 @@
 ---
-title: "temp_web"
+title: "Zumratmo Zarifkhonova"
+about:
+  id: intro-heading
+  template: trestles
+  image: Image/profile.pic.jpeg
+  image-shape: round
+  links:
+    - icon: LinkeIn
+      href: https://www.linkedin.com/in/zumratmo-zarifkhonova-231001261/
 ---
 
-This is a Quarto website.
+:::{#intro-heading}
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
+## Zumratmo Zarifkhonova
 
-```{r}
-1 + 1
-```
+
+### Education
+
+BA in Quantitative Economics with Statistics and Data Science Concentration>
+2020 - 2026 | St. Olaf College
+
+International Baccalaureate>
+2020 | Li Po Chun United World College of Hong Kong
+:::
+
+### Get in Touch
+
+**Email**: <a href='mailto:zarifk1@stolaf.edu'>zarifk1 at stolaf.edu</a>
+
+**Residence Hall**: Rand Hall
+
+**Address**: 1520 St. Olaf Ave, Northfield, MN 55057
+
+**Phone**: 507-838-0668

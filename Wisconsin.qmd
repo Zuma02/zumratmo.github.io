@@ -1,0 +1,198 @@
+---
+title: "Checking Out Wisconsin's Election Map"
+---
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| output: false
+
+library(fec16)
+library(maps)
+library(tidyverse)
+library(mdsr)
+library(viridis)
+library(sf)
+library(ggspatial)
+library(prettymapr)
+library(ggplot2)
+library(ggmap)
+library(leaflet)
+library(tmap)
+
+
+
+# To install fec 12 the first time, uncomment the code below (you might have to install devtools as well):
+# devtools::install_github("baumer-lab/fec12")
+library(fec16)
+print(results_house, width = Inf)
+results_house |>
+  group_by(state, district_id) |>
+  summarize(N = n())
+```
+
+
+We took a closer look at how people in Wisconsin voted, breaking it down district by district. 
+
+We used colors to highlight which districts leaned towards Democrats (blue) and which ones leaned towards Republicans (red). The idea was to see not just who won, but how strongly they won in different parts of the state.
+
+
+
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| output: false
+
+
+
+district_elections <- results_house |>
+  mutate(district = parse_number(district_id)) |>
+  group_by(state, district) |>
+  summarize(
+    N = n(), 
+    total_votes = sum(general_votes, na.rm = TRUE),
+    d_votes = sum(ifelse(party == "DEM", general_votes, 0), na.rm = TRUE),
+    r_votes = sum(ifelse(party == "REP", general_votes, 0), na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  mutate(
+    other_votes = total_votes - d_votes - r_votes,
+    r_prop = r_votes / total_votes,  
+    winner = ifelse(r_votes > d_votes, "Republican", "Democrat")
+  )
+wi_results <- district_elections |>
+  filter(state == "WI")
+wi_results |>                  
+  select(-state)
+```
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| output: false
+
+
+wi_results |>
+  skim(total_votes) |>
+  select(-na)
+
+
+wi_results |>
+  summarize(
+    N = n(), 
+    state_votes = sum(total_votes), 
+    state_d = sum(d_votes), 
+    state_r = sum(r_votes)
+  ) |>
+  mutate(
+    d_prop = state_d / state_votes, 
+    r_prop = state_r / state_votes
+  )
+
+
+wi_results |>
+  select(district, r_prop, winner) |>
+  arrange(desc(r_prop))
+```
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| output: false
+
+
+src <- "http://cdmaps.polisci.ucla.edu/shp/districts114.zip"
+lcl_zip <- fs::path(tempdir(), "districts114.zip")
+download.file(src, destfile = lcl_zip)
+lcl_districts <- fs::path(tempdir(), "districts114")
+unzip(lcl_zip, exdir = lcl_districts)
+dsn_districts <- fs::path(lcl_districts, "districtShapes")
+
+
+
+st_layers(dsn_districts)
+
+districts <- st_read(dsn_districts, layer = "districts114") |>
+  mutate(DISTRICT = parse_number(as.character(DISTRICT)))
+head(districts, width = Inf)
+class(districts)
+
+
+wi_shp <- districts |>
+  filter(STATENAME == "Wisconsin")
+```
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+
+wi_shp |>
+  st_geometry() |>
+  plot(col = gray.colors(nrow(wi_shp)))
+
+```
+### The Big Picture: 
+This is about getting a quick look at how varied political opinions are across the state. Some areas are solidly one color or the other, but many are somewhere in between. This shows us that opinions and voting patterns can be pretty diverse.
+
+
+
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+
+wi_merged <- wi_shp |>
+  st_transform("+proj=longlat +datum = WGS84") |>
+  inner_join(wi_results, by = c("DISTRICT" = "district"))
+
+
+
+wi <- ggplot(data = wi_merged, aes(fill = winner)) +
+  annotation_map_tile(zoom = 6, type = "osm", progress = "none") + 
+  geom_sf(alpha = 0.5) +
+  scale_fill_manual("Winner", values = c("blue", "red")) + 
+  geom_sf_label(aes(label = DISTRICT), fill = "white") + 
+  theme_void()
+
+
+
+wi +
+  aes(fill = r_prop) + 
+  scale_fill_distiller(
+    "Proportion\nRepublican", 
+    palette = "RdBu", 
+    limits = c(0.2, 0.8)
+  )
+
+```
+### Looking Ahead: 
+By understanding these patterns, we can start to guess how things might change in the future. Maybe some areas will switch colors, or maybe they’ll become even more strongly one way or the other. It’s all about spotting trends and thinking about what could happen next.
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+
+library(leaflet)
+pal <- colorNumeric(palette = "RdBu", domain = c(0, 1))
+
+leaflet_wi <- leaflet(wi_merged) |>
+  addTiles() |>
+  addPolygons(
+    weight = 1, fillOpacity = 0.7, 
+    color = ~pal(1 - r_prop),   # so red association with Reps
+    popup = ~paste("District", DISTRICT, "</br>", round(r_prop, 3))
+  ) |>                          # popups show prop Republican
+  setView(lng = -89.5, lat = 44.5, zoom = 6.2)
+leaflet_wi
+```
+
+### Conclusion: 
+Checking out the election map of Wisconsin shows us how different areas vote and gives us some clues about what might change in the future. It’s a straightforward look at the state's political diversity and how every part of Wisconsin plays a role in shaping the overall picture. Remember, every district has its own story, and together, they tell us a lot about democracy in action.

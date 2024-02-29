@@ -1,0 +1,53 @@
+---
+title: "US Maps"
+---
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+#| output: false
+
+library(tidyverse)
+library(maps)
+library(viridis)
+library(mdsr)
+
+library(readr)
+
+min_wage <- read_csv("Minimum Wage Data.csv")
+us_states <- map_data("state")
+
+min_wage|>
+  distinct(Year, State)|>
+  count(Year)
+```
+
+```{r}
+#| message: false
+#| warning: false
+#| echo: false
+
+
+min_wage|>
+  select(Year, State, State.Minimum.Wage) |>
+  filter(Year %in% c(2017, 2018, 2015, 2016, 2012, 2020))|>
+
+  
+  right_join(us_states, by= c("State"= "region"))|>
+  ggplot(mapping=aes(x=long, y=lat,
+                     group=group))+
+  geom_polygon(aes(fill=State.Minimum.Wage), color="black")+
+  labs(fill= "Population Percent Change", title = "Population Change Across the U.S. States",
+       subtitle = "Visualizing Percent Change in Population by State")+
+  coord_map()+
+  theme_gray()+
+  scale_fill_gradient()+
+  facet_wrap(~Year) 
+```
+
+### Exploring Minimum Wage Trends Across the U.S.
+
+This analysis dives into the changing landscape of minimum wages across the United States over selected years, highlighting the shifts and trends from 2012 to 2020.
+
+Through these map, we're not just looking at numbers; we're seeing the impact of policy changes, economic shifts, and the ongoing debate around fair wages and living standards.
