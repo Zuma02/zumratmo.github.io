@@ -32,6 +32,7 @@ min_wage|>
 min_wage|>
   select(Year, State, State.Minimum.Wage) |>
   filter(Year %in% c(2017, 2018, 2015, 2016, 2012, 2020))|>
+  mutate(State = tolower(State))|>
 
   
   right_join(us_states, by= c("State"= "region"))|>
@@ -45,6 +46,20 @@ min_wage|>
   scale_fill_gradient()+
   facet_wrap(~Year) 
 ```
+```{r}
+ggplot(mapping = aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = State.Minimum.Wage), color = "black") +
+  labs(fill= "State Minimum Wage", title = "Minimum Wage Across the U.S. States",
+       subtitle = "Visualizing State Minimum Wage by Year") +
+  coord_map() +
+  theme_gray() +
+  scale_fill_gradient(low = "blue", high = "red") +  # Adjust colors as needed
+  facet_wrap(~Year)
+
+```
+
+
+
 
 ### Exploring Minimum Wage Trends Across the U.S.
 
