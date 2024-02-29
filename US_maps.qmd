@@ -46,17 +46,7 @@ min_wage|>
   scale_fill_gradient()+
   facet_wrap(~Year) 
 ```
-```{r}
-ggplot(mapping = aes(x = long, y = lat, group = group)) +
-  geom_polygon(aes(fill = State.Minimum.Wage), color = "black") +
-  labs(fill= "State Minimum Wage", title = "Minimum Wage Across the U.S. States",
-       subtitle = "Visualizing State Minimum Wage by Year") +
-  coord_map() +
-  theme_gray() +
-  scale_fill_gradient(low = "blue", high = "red") +  # Adjust colors as needed
-  facet_wrap(~Year)
 
-```
 
 
 
