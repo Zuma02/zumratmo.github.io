@@ -1,0 +1,62 @@
+---
+title: "Mini_project2"
+---
+
+This simulation will explore **the effectiveness of a new medication for treating a chronic condition**, such as hypertension. This scenario involves comparing the new medication against a placebo to observe differences in systolic blood pressure reduction. The aim is to determine whether the medication is significantly more effective than the placebo.
+
+####      We will write a function, simulate_ttest,that will:
+
+-   Generate two sets of data for the treatment and placebo groups, assuming normal distributions with specified parameters.
+
+-   Perform a two-sample t-test on these datasets.
+
+-   Return **`TRUE`** if the test rejects the null hypothesis, and **`FALSE`** otherwise.
+
+    #### Creating a Loop to Run the Simulations
+
+Using a for loop that will run the **`simulate_ttest`** function 1000 times for each sample sizes. This will help us assess how changing the sample size affects the power of the test.
+
+####      Generating an Illustrative Plot
+
+We'll create a plot that shows the relationship between sample size and power, helping us visualize the optimal sample size needed to achieve a desirable power level that we will set at 0.8(being the average).
+
+```{r}
+simulate_ttest <- function(n, mean_diff, sd1, sd2, alpha = 0.05) {
+  group1 <- rnorm(n, 0, sd1)  # Placebo group
+  group2 <- rnorm(n, mean_diff, sd2)  # Treatment group
+  test_result <- t.test(group1, group2)
+  return(test_result$p.value < alpha)
+}
+
+set.seed(123) 
+sample_sizes <- seq(20, 200, by = 10)
+power_values <- numeric(length(sample_sizes))  # Initialize a vector to store power values
+
+for (i in 1:length(sample_sizes)) {
+  n <- sample_sizes[i]
+  # Run 1000 simulations for each sample size
+  results <- replicate(1000, simulate_ttest(n, mean_diff = 5, sd1 = 10, sd2 = 10))
+  power_values[i] <- mean(results)
+}
+
+library(ggplot2)
+
+data <- data.frame(sample_sizes, power_values)
+ggplot(data, aes(x = sample_sizes, y = power_values)) +
+  geom_line() +
+  geom_hline(yintercept = 0.80, linetype = "dashed", color = "red") +
+  labs(title = "Optimizing Sample Size to Ensure Reliable Detection of Medication Efficacy on Power",
+       x = "Sample Size",
+       y = "Power")
+
+```
+
+Insights about the graph:
+
+In simple terms, think of our study like an experiment to find out if a new blood pressure medicine really works better than just taking a sugar pill (placebo). To make sure our results are trustworthy, we use something called a "power" of the test, which is a way of saying, how likely we are to discover the true effect of the medicine if there really is one.
+
+Imagine we are trying to listen to a faint song playing in a noisy room. The "power" is like our ability to hear the song despite the noise. If we only listen for a short time (small sample size), the noise might drown out the song, and we might think there's no music playing when there actually is. But if we listen for longer (larger sample size), we're more likely to hear the song clearly.
+
+Our study showed that the more patients we include in our test (like listening for a longer time), the better our chances of accurately finding out if the medicine truly works (hearing the song). We used a chart with a line to show how increasing the number of patients improves our chances. We marked a spot on the chart to show the minimum number of patients needed to be pretty sure (80% sure, to be exact) we can tell if the medicine is effective.
+
+This tells us that when planning experiments like this, it's really important to include enough patients. If we don't, we might miss finding out that a medicine really works, just like missing a great song because the room is too noisy.

@@ -14,9 +14,10 @@ website:
             href: US_maps.qmd
           - text: Wisconsin
             href: Wisconsin.qmd
-        
-        
-      - about.qmd
+      - text: Project 2
+        menu: 
+          - text: Power test
+            href: mini_proj2.qmd
       
 page-footer:
     left: |
